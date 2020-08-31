@@ -45,6 +45,7 @@ body{
 .flex-topbar .navbar-text{
 	font-size: 21px;
     font-weight: bold;
+  text-align: center;
 }
 
 .form-container {
