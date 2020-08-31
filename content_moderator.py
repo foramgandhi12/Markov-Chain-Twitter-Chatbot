@@ -1,47 +1,29 @@
 import http.client, urllib.request, urllib.parse, urllib.error, base64
-import json
+import urllib.request
 import config
-import re
-
-# Request headers
-headers = {
-    "Content-Type": "text/plain",
-    'Ocp-Apim-Subscription-Key': "b88f39de922f441688adb8d211f7656a",
-}
-
-# Request params
-params = {}
-
-COGNITIVE_SERVICES_URL = "eastus.api.cognitive.microsoft.com"
+import json
 
 
 def moderate(message):
-    data = make_request_to_api(message.encode("utf8"))
-    decoded_data = data.decode('utf-8')
+    print('Moderating message')
+    data = make_request_to_api(message)
+    decoded_data=data.decode('utf-8')
     json_data = json.loads(decoded_data)
-    terms = json_data["Terms"]
-    
-    if not terms or terms == None:
-        return message
-    else:
-        for term in terms:
-            pattern = re.compile(term["Term"], re.IGNORECASE)
-            message = pattern.sub("[CENSORED]", message)
-    return message
+    moderated_data = json_data["data"]
+    print(moderated_data)
 
+    if not moderated_data or moderated_data == None:
+        return message
+    print('returning moderated data: ' + moderated_data)
+    return moderated_data
 
 def make_request_to_api(message):
-    content_moderator_connection = http.client.HTTPSConnection(COGNITIVE_SERVICES_URL)
-    try: 
-      content_moderator_connection.request(
-          "POST", "/contentmoderator/moderate/v1.0/ProcessText/Screen?%s" % params, message, headers
-      )
-    except Exception as e: 
-      print(e)
-      print('there was an error')
-      
-    response = content_moderator_connection.getresponse()
-    data = response.read()
-    content_moderator_connection.close()
-    
-    return data
+    url = config.MLH_TWITTER_API + "/api/moderated_content"
+    req = urllib.request.Request(url)
+    req.add_header("Content-Type", "application/json; charset=utf-8")
+    jsondata = json.dumps({"content": message})
+    jsondataasbytes = jsondata.encode("utf-8")
+    req.add_header("Content-Length", len(jsondataasbytes))
+    response = urllib.request.urlopen(req, jsondataasbytes).read()
+
+    return response
