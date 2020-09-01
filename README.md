@@ -5,7 +5,6 @@ This is a Markov chain bot that allows the user to chat with a celebrity. The us
 
 ![](Twitterbot.jpg)
 
-
 ### static/script.js
 
 This is the file that makes the website interactive.
